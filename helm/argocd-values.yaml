@@ -1,0 +1,5 @@
+# Prep defaults: reach Argo CD UI from the host without extra LoadBalancer wiring.
+# Extend for HA, SSO, or ingress later — see docs/ARGOCD.md.
+server:
+  service:
+    type: NodePort

@@ -57,7 +57,11 @@ curl -s http://fake-llm.aire-prep.local/health
 
 ### 4. GitOps (Argo CD)
 
-See [docs/ARGOCD.md](docs/ARGOCD.md) for Helm-based install and `Application` manifests under `gitops/argocd/applications/`.
+```bash
+make install-argocd
+```
+
+Then follow [docs/ARGOCD.md](docs/ARGOCD.md) for the admin password, UI port-forward, and `make apply-argocd-apps` after you set `repoURL` in `gitops/argocd/applications/*.yaml`.
 
 ### 5. Local MCP server (no cluster required)
 

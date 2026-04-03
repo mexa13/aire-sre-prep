@@ -8,6 +8,7 @@ Record Helm chart versions after `helm list` / `helm search repo` so the course 
 | ingress-nginx | `helm search repo ingress-nginx/ingress-nginx --versions` |
 | cert-manager | `helm search repo jetstack/cert-manager --versions` |
 | kube-prometheus-stack | `helm search repo prometheus-community/kube-prometheus-stack --versions` |
+| argo-cd | `helm search repo argo/argo-cd --versions` (after `helm repo add argo ...`) |
 | otel-collector | Image tag in `manifests/observability/otel-collector.yaml` |
 | Jaeger | Image tag in `manifests/observability/jaeger.yaml` |
 | fake-llm deps | `apps/fake-llm/requirements.txt` |

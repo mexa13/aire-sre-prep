@@ -1,15 +1,23 @@
 # Argo CD bootstrap (prep lab)
 
-GitOps gives you a baseline to contrast with **GitLess Ops** during the course. These steps install Argo CD into the kind cluster and register Applications that point at your fork of this repository.
+GitOps gives you a baseline to contrast with **GitLess Ops** during the course. This doc covers **what Make does not know** (password, Git repo URL, port-forward). The install itself matches the other platform charts.
 
-## Install
+## Install (recommended)
+
+From the repo root:
+
+```bash
+make install-argocd
+```
+
+That runs `helm upgrade --install` with [helm/argocd-values.yaml](../helm/argocd-values.yaml) (NodePort for the server). To reproduce by hand:
 
 ```bash
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 helm upgrade --install argocd argo/argo-cd \
   -n argocd --create-namespace \
-  --set server.service.type=NodePort \
+  -f helm/argocd-values.yaml \
   --wait --timeout 10m
 ```
 
@@ -37,12 +45,13 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
    make load-fake-llm
    ```
 
-4. Apply:
+4. Register Applications:
 
    ```bash
-   kubectl apply -f gitops/argocd/applications/app-aire-prep-observability.yaml
-   kubectl apply -f gitops/argocd/applications/app-aire-prep-apps.yaml
+   make apply-argocd-apps
    ```
+
+   Or apply manifests one by one if you prefer.
 
 ## Exercise (week 2)
 

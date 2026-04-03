@@ -4,10 +4,11 @@ NS ?= aire-prep
 KIND_CONFIG ?= cluster/kind-config.yaml
 
 .PHONY: cluster-up cluster-down install-metrics-server install-ingress install-cert-manager \
-	install-prometheus install-otel-jaeger apply-apps build-fake-llm load-fake-llm argocd-install help
+	install-prometheus install-otel-jaeger install-argocd apply-argocd-apps \
+	apply-apps build-fake-llm load-fake-llm argocd-install help
 
 help:
-	@echo "Targets: cluster-up cluster-down install-* apply-apps argocd-install"
+	@echo "Targets: cluster-up cluster-down install-* install-argocd apply-argocd-apps apply-apps"
 
 cluster-up:
 	kind create cluster --config $(KIND_CONFIG)
@@ -64,5 +65,20 @@ load-fake-llm: build-fake-llm
 apply-apps: load-fake-llm
 	kubectl apply -k manifests/apps/
 
-argocd-install:
-	@echo "See docs/ARGOCD.md — run documented helm install, then kubectl apply -k gitops/argocd/applications/"
+# Optional GitOps — same pattern as other Helm installs. Docs: UI login, repo URL in Application YAMLs.
+install-argocd:
+	helm repo add argo https://argoproj.github.io/argo-helm
+	helm repo update
+	helm upgrade --install argocd argo/argo-cd \
+		-n argocd --create-namespace \
+		-f helm/argocd-values.yaml \
+		--wait --timeout 10m
+	@echo "Admin password: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo"
+	@echo "UI: kubectl port-forward svc/argocd-server -n argocd 8080:443  → https://localhost:8080 (user: admin)"
+
+# Apply Argo Applications (edit repoURL in gitops/argocd/applications/*.yaml first; ensure fake-llm image is loaded).
+apply-argocd-apps:
+	kubectl apply -f gitops/argocd/applications/
+
+# Backward-compatible alias
+argocd-install: install-argocd
