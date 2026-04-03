@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/mexa13/aire-sre-prep.git
-    targetRevision: main
+    targetRevision: master
     path: manifests/apps
   destination:
     server: https://kubernetes.default.svc
