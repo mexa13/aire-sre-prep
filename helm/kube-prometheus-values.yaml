@@ -1,0 +1,20 @@
+# Minimal values for a prep cluster; scrape all ServiceMonitors in cluster.
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    scrapeInterval: 30s
+    retention: 4d
+
+grafana:
+  enabled: true
+  adminPassword: changeme-prep-only
+
+defaultRules:
+  create: true
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true

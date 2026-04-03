@@ -1,0 +1,22 @@
+# After Argo CD is installed (see docs/ARGOCD.md), replace mexa13/aire-sre-prep
+# and apply: kubectl apply -f gitops/argocd/applications/app-aire-prep-apps.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aire-prep-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mexa13/aire-sre-prep.git
+    targetRevision: main
+    path: manifests/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aire-prep
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

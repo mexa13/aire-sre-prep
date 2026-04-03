@@ -1,0 +1,25 @@
+# OPTIONAL: illustrative NetworkPolicy — not applied by default.
+# Requires a CNI that enforces NetworkPolicy (Calico, Cilium, kind default kube-router, etc.).
+#
+# kubectl apply -f manifests/apps/networkpolicy-sample.yaml
+#
+# Tighten further: only allow ingress from ingress-nginx namespace with proper labels.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fake-llm-ingress-only
+  namespace: aire-prep
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: fake-llm
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080

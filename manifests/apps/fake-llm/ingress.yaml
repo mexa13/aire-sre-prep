@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fake-llm
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: fake-llm.aire-prep.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fake-llm
+                port:
+                  number: 8080

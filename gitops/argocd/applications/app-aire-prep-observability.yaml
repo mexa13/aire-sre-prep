@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aire-prep-observability
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mexa13/aire-sre-prep.git
+    targetRevision: main
+    path: manifests/observability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aire-prep
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
