@@ -3,12 +3,13 @@ CLUSTER_NAME ?= aire-prep
 NS ?= aire-prep
 KIND_CONFIG ?= cluster/kind-config.yaml
 
-.PHONY: cluster-up cluster-down install-metrics-server install-ingress install-cert-manager \
+.PHONY: cluster-up cluster-down install-platform bootstrap-lab \
+	install-metrics-server install-ingress install-cert-manager \
 	install-prometheus install-otel-jaeger install-argocd apply-argocd-apps \
 	apply-apps build-fake-llm load-fake-llm argocd-install help
 
 help:
-	@echo "Targets: cluster-up cluster-down install-* install-argocd apply-argocd-apps apply-apps"
+	@echo "Targets: cluster-up cluster-down install-platform bootstrap-lab install-* install-argocd apply-apps"
 
 cluster-up:
 	kind create cluster --config $(KIND_CONFIG)
@@ -19,13 +20,35 @@ cluster-up:
 cluster-down:
 	kind delete cluster --name $(CLUSTER_NAME)
 
+# Everything except Argo and sample apps (correct order). Use after a fresh `cluster-up`.
+install-platform:
+	$(MAKE) install-metrics-server
+	$(MAKE) install-ingress
+	$(MAKE) install-cert-manager
+	$(MAKE) install-prometheus
+	$(MAKE) install-otel-jaeger
+
+# Full lab stack on an empty cluster: platform + whoami/fake-llm. Argo: run install-argocd + apply-argocd-apps separately.
+bootstrap-lab:
+	$(MAKE) install-platform
+	$(MAKE) apply-apps
+	@echo "Done. Optional GitOps: make install-argocd && make apply-argocd-apps"
+
 install-metrics-server:
 	kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-	kubectl rollout status deployment/metrics-server -n kube-system --timeout=120s
-	# kind: kubelet certs do not include node IP SANs; without this, scraping fails with x509 errors.
-	kubectl patch deployment metrics-server -n kube-system --type='json' \
-		-p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]'
-	kubectl rollout status deployment/metrics-server -n kube-system --timeout=120s
+	@# kind + upstream v0.8.x: without --kubelet-insecure-tls, kubelet scraping fails (x509 / no metrics).
+	@# Do NOT wait for Ready before patching — the deployment may not become Available until scraping works.
+	@n=0; until kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; do \
+	  n=$$((n+1)); test $$n -le 60 || (echo "timeout waiting for metrics-server Deployment"; exit 1); \
+	  sleep 1; \
+	done
+	@if kubectl get deployment metrics-server -n kube-system -o jsonpath='{.spec.template.spec.containers[0].args}' 2>/dev/null | grep -q kubelet-insecure-tls; then \
+	  echo "metrics-server already patched for kind"; \
+	else \
+	  kubectl patch deployment metrics-server -n kube-system --type='json' \
+	    -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]'; \
+	fi
+	kubectl rollout status deployment/metrics-server -n kube-system --timeout=180s
 	@echo "Verify: kubectl top nodes"
 
 # ingress-nginx — version pinned via Helm repo

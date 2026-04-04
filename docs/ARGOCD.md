@@ -53,6 +53,10 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
    Or apply manifests one by one if you prefer.
 
+## Next: after apps are synced
+
+Follow the ordered checklist: [AFTER-ARGOCD-SYNC.md](AFTER-ARGOCD-SYNC.md) (verify health, curls, Jaeger, Grafana, GitOps rollback, templates, MCP, optional course tools).
+
 ## Exercise (week 2)
 
 - Trigger a change in Git and watch sync.

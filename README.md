@@ -31,9 +31,25 @@ To tear down:
 make cluster-down
 ```
 
+ **`cluster-down` deletes the whole cluster** (all namespaces, Helm releases, and images loaded into kind). **`cluster-up` gives you an empty cluster** — you must reinstall everything. Your local Docker image `fake-llm:prep` may still exist on disk, but you need `kind load` again (included in `make apply-apps`).
+
+**Shortcut after recreate:**
+
+```bash
+make cluster-up
+make bootstrap-lab
+# optional: make install-argocd && make apply-argocd-apps
+```
+
 ### 2. Install platform components
 
 Run installs in order (idempotent Helm upgrades). Resolve Metrics Server on kind if needed — [docs/KIND-NOTES.md](docs/KIND-NOTES.md). Pin chart versions in [docs/VERSION-PINS.md](docs/VERSION-PINS.md).
+
+```bash
+make install-platform
+```
+
+Or step by step:
 
 ```bash
 make install-metrics-server
@@ -63,6 +79,8 @@ make install-argocd
 
 Then follow [docs/ARGOCD.md](docs/ARGOCD.md) for the admin password, UI port-forward, and `make apply-argocd-apps` after you set `repoURL` in `gitops/argocd/applications/*.yaml`.
 
+**After Argo syncs the apps**, continue in order: [docs/AFTER-ARGOCD-SYNC.md](docs/AFTER-ARGOCD-SYNC.md).
+
 ### 5. Local MCP server (no cluster required)
 
 ```bash
@@ -85,10 +103,11 @@ Wire the server into your MCP client per [docs/MCP.md](docs/MCP.md).
 | `gitops/argocd/` | Argo CD application examples |
 | `mcp-server/` | Minimal MCP tools server for local practice |
 | `docs/` | Weekly session outline, runbook, SLO lab, security notes, course tool smoke tests |
+| `grafana/dashboards/` | Grafana JSON dashboards (ingress + workload health); see [grafana/README.md](grafana/README.md) |
 
 ## Observability
 
-- **Metrics**: Prometheus / Grafana via `kube-prometheus-stack` (`make install-prometheus`).
+- **Metrics**: Prometheus / Grafana via `kube-prometheus-stack` (`make install-prometheus`). Which series exist and why: [docs/PROMETHEUS-METRICS-LAB.md](docs/PROMETHEUS-METRICS-LAB.md).
 - **Traces**: OpenTelemetry Collector + Jaeger (see `manifests/observability/`).
 - **LLM eval UI**: optional Phoenix / OpenInference — [docs/PHOENIX-OPENINFERENCE.md](docs/PHOENIX-OPENINFERENCE.md).
 

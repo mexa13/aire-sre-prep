@@ -1,5 +1,10 @@
 # Host networking for kind ingress guide compatibility.
 controller:
+  # Single replica + hostPort 80/443: RollingUpdate tries to run two pods on one node →
+  # "didn't have free ports". Recreate tears down the old pod before starting the new one.
+  replicaCount: 1
+  updateStrategy:
+    type: Recreate
   service:
     type: NodePort
   publishService:
@@ -19,3 +24,12 @@ controller:
     enabled: false
   extraArgs:
     publish-status-address: localhost
+  # Expose Prometheus metrics (nginx_ingress_controller_*) for Grafana dashboards.
+  # fake-llm / whoami do not export http_requests_total; ingress sees their traffic.
+  metrics:
+    enabled: true
+    service:
+      annotations: {}
+    serviceMonitor:
+      enabled: true
+      scrapeInterval: 30s
