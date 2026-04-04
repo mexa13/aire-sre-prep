@@ -1,6 +1,6 @@
 # Argo CD bootstrap (prep lab)
 
-GitOps gives you a baseline to contrast with **GitLess Ops** during the course. This doc covers **what Make does not know** (password, Git repo URL, port-forward). The install itself matches the other platform charts.
+GitOps gives you a baseline to contrast with **GitLess Ops** during the course. This doc covers **what Make does not know** (password, Git repo URL, UI URL). The install itself matches the other platform charts.
 
 ## Install (recommended)
 
@@ -10,7 +10,7 @@ From the repo root:
 make install-argocd
 ```
 
-That runs `helm upgrade --install` with [helm/argocd-values.yaml](../helm/argocd-values.yaml) (NodePort for the server). To reproduce by hand:
+That runs `helm upgrade --install` with [helm/argocd-values.yaml](../helm/argocd-values.yaml): **Ingress** on `argocd.aire-prep.local`, **HTTP** (`configs.params.server.insecure: "true"`) so nginx can proxy without TLS to the pod. To reproduce by hand:
 
 ```bash
 helm repo add argo https://argoproj.github.io/argo-helm
@@ -28,11 +28,16 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
   -o jsonpath='{.data.password}' | base64 -d && echo
 ```
 
-Port-forward the UI (simplest on kind):
+## Open the UI
+
+1. Add **`argocd.aire-prep.local`** to `/etc/hosts` (see [KIND-NOTES.md](KIND-NOTES.md#lab-hostnames-ingress)).
+2. Open **`http://argocd.aire-prep.local`** — user **`admin`**, password from the command above.
+
+Fallback without hosts:
 
 ```bash
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-# Open https://localhost:8080 — accept self-signed cert; user admin
+kubectl port-forward svc/argocd-server -n argocd 8080:80
+# http://localhost:8080
 ```
 
 ## Register Applications

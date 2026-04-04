@@ -1,5 +1,20 @@
-# Prep defaults: reach Argo CD UI from the host without extra LoadBalancer wiring.
-# Extend for HA, SSO, or ingress later — see docs/ARGOCD.md.
+# Prep: Argo CD UI via ingress (HTTP). kind maps 80/443 on localhost. Re-run: make install-argocd
+# Ingress backend port follows configs.params.server.insecure (argo-cd chart uses HTTP service port when true).
+global:
+  domain: argocd.aire-prep.local
+
+configs:
+  params:
+    server.insecure: "true"
+
 server:
   service:
-    type: NodePort
+    type: ClusterIP
+  ingress:
+    enabled: true
+    controller: generic
+    ingressClassName: nginx
+    hostname: argocd.aire-prep.local
+    tls: false
+    path: /
+    pathType: Prefix

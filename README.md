@@ -29,6 +29,8 @@ make bootstrap-lab
 # optional GitOps: make install-argocd && make apply-argocd-apps
 ```
 
+**Local URLs:** Grafana, Prometheus, Alertmanager, Jaeger, sample apps, and (after Argo install) Argo CD are exposed via **ingress** on `*.aire-prep.local`. Add lines to `/etc/hosts` as in [docs/KIND-NOTES.md](docs/KIND-NOTES.md#lab-hostnames-ingress).
+
 ---
 
 ## Repository layout

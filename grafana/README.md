@@ -6,7 +6,8 @@ JSON exports for import into Grafana bundled with `kube-prometheus-stack`.
 
 ## Import
 
-1. Port-forward Grafana: `kubectl port-forward -n monitoring svc/kube-prometheus-grafana 3000:80` (adjust release name if yours differs).
+1. Open Grafana at **`http://grafana.aire-prep.local`** (add hosts per [docs/KIND-NOTES.md](../docs/KIND-NOTES.md#lab-hostnames-ingress); Helm release `kube-prometheus`).  
+   Fallback: `kubectl port-forward -n monitoring svc/kube-prometheus-grafana 3000:80`.
 2. **Dashboards → New → Import → Upload JSON file**.
 3. Select the **Prometheus** datasource when prompted (or ensure a datasource exists with **UID `prometheus`** — kube-prometheus-stack often registers it that way; if your UID differs, use **Import → Options → Prometheus** dropdown or edit each panel datasource).
 

@@ -5,3 +5,4 @@ resources:
   - otel-collector-config.yaml
   - otel-collector.yaml
   - jaeger.yaml
+  - jaeger-ingress.yaml

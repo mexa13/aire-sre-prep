@@ -1,14 +1,42 @@
 # Minimal values for a prep cluster; scrape all ServiceMonitors in cluster.
+# Ingress hostnames use *.aire-prep.local — add to /etc/hosts (docs/KIND-NOTES.md). Re-apply: make install-prometheus
 prometheus:
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     scrapeInterval: 30s
     retention: 4d
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - prometheus.aire-prep.local
+    paths:
+      - /
+    pathType: Prefix
 
 grafana:
   enabled: true
   adminPassword: changeme-prep-only
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - grafana.aire-prep.local
+  grafana.ini:
+    server:
+      domain: grafana.aire-prep.local
+      root_url: http://grafana.aire-prep.local/
+
+alertmanager:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - alertmanager.aire-prep.local
+    paths:
+      - /
+    pathType: Prefix
 
 defaultRules:
   create: true

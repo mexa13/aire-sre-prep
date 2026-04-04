@@ -27,23 +27,47 @@ The lab [helm/ingress-nginx-values.yaml](../helm/ingress-nginx-values.yaml) sets
 
 If you still see the error, check no second replica or autoscaling: `kubectl get deploy -n ingress-nginx -o wide`.
 
-## Ingress and /etc/hosts
+## Lab hostnames (ingress)
 
-With `cluster/kind-config.yaml` mapping host ports **80** and **443**, and ingress-nginx using `hostPort`, use:
+kind maps **80**/**443** on the host to ingress-nginx ([cluster/kind-config.yaml](../cluster/kind-config.yaml)). Add to **`/etc/hosts`**:
 
 ```text
-127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local
+127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local argocd.aire-prep.local
+```
+
+Skip `argocd.aire-prep.local` until you run `make install-argocd`.
+
+**Wildcards:** `/etc/hosts` does **not** support `*.aire-prep.local` (or any pattern). Each hostname must appear literally; you can put several names on one line after the IP.
+
+| URL | What |
+|-----|------|
+| http://whoami.aire-prep.local | whoami echo |
+| http://fake-llm.aire-prep.local | Stub LLM HTTP API |
+| http://grafana.aire-prep.local | Grafana (stack Helm release `kube-prometheus`) |
+| http://prometheus.aire-prep.local | Prometheus UI |
+| http://alertmanager.aire-prep.local | Alertmanager UI |
+| http://jaeger.aire-prep.local | Jaeger UI |
+| http://argocd.aire-prep.local | Argo CD UI (HTTP; `configs.params.server.insecure` in [helm/argocd-values.yaml](../helm/argocd-values.yaml)) |
+
+**Existing cluster:** after `git pull`, re-apply observability and upgrade Helm releases so Ingress objects exist:
+
+```bash
+kubectl apply -k manifests/observability/
+make install-prometheus
+make install-argocd   # if you use Argo
 ```
 
 ## Jaeger UI
 
-Jaeger runs inside the cluster. Example port-forward:
+Prefer **`http://jaeger.aire-prep.local`** (Ingress in [manifests/observability/jaeger-ingress.yaml](../manifests/observability/jaeger-ingress.yaml)).
+
+Port-forward fallback:
 
 ```bash
 kubectl port-forward svc/jaeger 16686:16686 -n aire-prep
 ```
 
-Open http://localhost:16686 and search for service `fake-llm`.
+Open `http://localhost:16686` and search for service `fake-llm`.
 
 ## Image loads
 

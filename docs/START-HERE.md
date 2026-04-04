@@ -61,11 +61,13 @@ kubectl get nodes
 make bootstrap-lab
 ```
 
-`/etc/hosts`:
+`/etc/hosts` (covers sample apps + monitoring + Jaeger after `bootstrap-lab`; add Argo in Phase D):
 
 ```text
-127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local
+127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local
 ```
+
+After **Phase D**, append: `argocd.aire-prep.local` to the same line (or add a second line). Full URL map: [KIND-NOTES.md](KIND-NOTES.md#lab-hostnames-ingress).
 
 **Prove the path:** pods exist **without** any `argocd` namespace required:
 
@@ -90,10 +92,10 @@ If `curl` fails: `kubectl get pods -n ingress-nginx`, `kubectl describe ingress 
 ```bash
 make install-argocd
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
-kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
-1. UI `https://localhost:8080` → `admin` + password above.  
+1. Add `argocd.aire-prep.local` to `/etc/hosts` (see Phase C). Open **`http://argocd.aire-prep.local`** → `admin` + password above.  
+   Fallback: `kubectl port-forward svc/argocd-server -n argocd 8080:80` → `http://localhost:8080`.  
 2. Set `repoURL` in `gitops/argocd/applications/*.yaml`.  
 3. `make apply-argocd-apps`  
 4. `ImagePullBackOff` on fake-llm → `make load-fake-llm` → **Refresh** in Argo.
@@ -127,11 +129,9 @@ curl -sS -X POST http://fake-llm.aire-prep.local/v1/chat/completions \
 
 **Goal:** See traces after traffic to fake-llm.
 
-```bash
-kubectl port-forward svc/jaeger 16686:16686 -n aire-prep
-```
+Browser: **`http://jaeger.aire-prep.local`** (hosts from Phase C) → search service **fake-llm**.
 
-Browser: `http://localhost:16686` → service **fake-llm**.
+Fallback: `kubectl port-forward svc/jaeger 16686:16686 -n aire-prep` → `http://localhost:16686`.
 
 **More:** [RUNBOOK-TRACES.md](RUNBOOK-TRACES.md).
 
@@ -141,11 +141,13 @@ Browser: `http://localhost:16686` → service **fake-llm**.
 
 **Goal:** Metrics UI + optional JSON dashboards.
 
-```bash
-kubectl port-forward -n monitoring svc/kube-prometheus-grafana 3000:80
-```
+Open **`http://grafana.aire-prep.local`** (requires `/etc/hosts` from Phase C).
 
 Login: `admin` / password in [helm/kube-prometheus-values.yaml](../helm/kube-prometheus-values.yaml). Imports: [grafana/README.md](../grafana/README.md).
+
+Optional: **Prometheus** UI `http://prometheus.aire-prep.local`, **Alertmanager** `http://alertmanager.aire-prep.local`.
+
+Fallback: `kubectl port-forward -n monitoring svc/kube-prometheus-grafana 3000:80`.
 
 **More:** [PROMETHEUS-METRICS-LAB.md](PROMETHEUS-METRICS-LAB.md).
 

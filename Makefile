@@ -97,7 +97,7 @@ install-argocd:
 		-f helm/argocd-values.yaml \
 		--wait --timeout 10m
 	@echo "Admin password: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo"
-	@echo "UI: kubectl port-forward svc/argocd-server -n argocd 8080:443  → https://localhost:8080 (user: admin)"
+	@echo "UI: http://argocd.aire-prep.local (add hosts per docs/KIND-NOTES.md). Fallback: kubectl port-forward svc/argocd-server -n argocd 8080:80"
 
 # Apply Argo Applications (edit repoURL in gitops/argocd/applications/*.yaml first; ensure fake-llm image is loaded).
 apply-argocd-apps:

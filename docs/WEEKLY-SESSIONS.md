@@ -35,7 +35,7 @@ Assume **3–4 sessions per week**, **1.5–2.5 hours** each (or two intensive w
 | C | Phoenix / OpenInference orientation | UI up or note blockers — see [PHOENIX-OPENINFERENCE.md](PHOENIX-OPENINFERENCE.md) |
 | Homework | [RUNBOOK-TRACES.md](RUNBOOK-TRACES.md) filled in | 10–15 lines |
 
-**Lab:** `make install-otel-jaeger`, `make apply-apps`, port-forward Jaeger, generate load on `/v1/chat/completions`.
+**Lab:** `make install-otel-jaeger`, `make apply-apps`, open Jaeger at `http://jaeger.aire-prep.local`, generate load on `/v1/chat/completions`.
 
 ## Week 4 — MCP, gateways, AI SLO framing
 

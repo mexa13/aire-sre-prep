@@ -26,11 +26,13 @@ Short path for **aire-prep** + **fake-llm** + **Jaeger**. Replace hosts if yours
 
 3. **Jaeger UI** (from [KIND-NOTES.md](KIND-NOTES.md))
 
+   Prefer **`http://jaeger.aire-prep.local`**. Fallback:
+
    ```bash
    kubectl port-forward svc/jaeger 16686:16686 -n aire-prep
    ```
 
-   Open `http://localhost:16686` → Search → service **`fake-llm`** (or leave open) → look for error spans or missing children after a failing request.
+   Open the UI → Search → service **`fake-llm`** (or leave open) → look for error spans or missing children after a failing request.
 
 ## Trace-guided path
 
