@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fake-llm-tls
+  namespace: aire-prep
+spec:
+  secretName: fake-llm-tls
+  issuerRef:
+    name: selfsigned-prep
+    kind: ClusterIssuer
+  dnsNames:
+    - fake-llm.aire-prep.local

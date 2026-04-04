@@ -1,6 +1,6 @@
 # Questions for the mentor (week-4 homework)
 
-Draft **5–7** concrete questions before the first live session. Examples (replace with yours):
+Draft **5–7** concrete questions before the first live session. Below is a **prep-ready set** — replace any that overlap with what you already know.
 
 1. How do you position **Agent Gateway** vs a classic API gateway (authN/Z, tenancy, budgets)?  
 2. Recommended **SLO set** when the model is served by a third party vs self-hosted?  
@@ -9,3 +9,7 @@ Draft **5–7** concrete questions before the first live session. Examples (repl
 5. Failure modes of **semantic caching** — when to disable?  
 6. How does **kagent** / **llm-d** change the on-call picture vs traditional microservices?  
 7. What would you **not** automate with agents in a regulated environment?
+
+## Your additions
+
+_(Add course-specific questions after the first lectures or reading.)_

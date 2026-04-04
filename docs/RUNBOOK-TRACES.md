@@ -1,28 +1,50 @@
 # Runbook: find 5xx causes using traces (lab template)
 
-Fill this in during **week 3**. Keep it short; aim for copy-paste commands.
+Short path for **aire-prep** + **fake-llm** + **Jaeger**. Replace hosts if yours differ.
 
 ## Symptoms
 
-- **What:** (e.g. intermittent 502 from ingress, spike in 5xx)
-- **When:** (time window, deployment id)
+- **What:** e.g. ingress returns **502** while backends are scaled down or crashing; or elevated **5xx** in Grafana “Non-2xx” panel.
+- **When:** note time window and any Argo / rollout event.
 
 ## Quick checks
 
-1. Ingress / service endpoints: `kubectl get ingress,svc,endpoints -n aire-prep`
-2. Pod logs: `kubectl logs deploy/fake-llm -n aire-prep --tail=200`
-3. Jaeger: port-forward (see [KIND-NOTES.md](KIND-NOTES.md)), filter `service.name=fake-llm`, look for error spans.
+1. **Routing and endpoints**
+
+   ```bash
+   kubectl get ingress,svc,endpoints -n aire-prep
+   ```
+
+   If **Endpoints** for `fake-llm` is empty → expect **502** from ingress.
+
+2. **Pod status and logs**
+
+   ```bash
+   kubectl get pods -n aire-prep -l app.kubernetes.io/name=fake-llm
+   kubectl logs deploy/fake-llm -n aire-prep --tail=200
+   ```
+
+3. **Jaeger UI** (from [KIND-NOTES.md](KIND-NOTES.md))
+
+   ```bash
+   kubectl port-forward svc/jaeger 16686:16686 -n aire-prep
+   ```
+
+   Open `http://localhost:16686` → Search → service **`fake-llm`** (or leave open) → look for error spans or missing children after a failing request.
 
 ## Trace-guided path
 
-1. Open a failing request trace id from logs or ingress.
-2. Note span where latency jumps (TTFT vs downstream).
-3. Record root cause hypothesis (one sentence).
+1. Generate a failing request (e.g. with backends at zero, after pausing Argo per [PROMETHEUS-METRICS-LAB.md](PROMETHEUS-METRICS-LAB.md)).
+2. If the request never reaches the app, Jaeger may show **no** `fake-llm` span — that is a signal the failure is **before** the workload (ingress / endpoints).
+3. When spans exist, note which span has high latency or error flags; relate to **TTFT** / handler spans in the stub.
 
 ## Rollback / mitigate
 
-- Command used (e.g. `kubectl rollout undo`, Argo history rollback).
+- **Argo:** Application **History** → **Rollback** (see [GITOPS-ROLLBACK-DRILL.md](GITOPS-ROLLBACK-DRILL.md)).
+- **kubectl:** `kubectl rollout undo deployment/fake-llm -n aire-prep`
+- **Scale back up:** `kubectl scale deployment/fake-llm -n aire-prep --replicas=1` (remember Argo self-heal if not paused).
 
 ## Follow-ups
 
-- What metric or alert would catch this earlier?
+- **Alert:** Grafana panel “Non-2xx” or kube endpoint count for `fake-llm`.
+- **Trace:** ensure OTLP path from `fake-llm` → collector → Jaeger stays up after incidents.

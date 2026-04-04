@@ -55,7 +55,7 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 ## Next: after apps are synced
 
-Follow the ordered checklist: [AFTER-ARGOCD-SYNC.md](AFTER-ARGOCD-SYNC.md) (verify health, curls, Jaeger, Grafana, GitOps rollback, templates, MCP, optional course tools).
+After Argo is up and apps sync, continue from **[START-HERE.md](START-HERE.md) Phase E** (verify, Jaeger, Grafana, rollback, templates, MCP, optional tools).
 
 ## Exercise (week 2)
 

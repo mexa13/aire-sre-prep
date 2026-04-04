@@ -1,5 +1,7 @@
 # Four-week prep schedule (before course start)
 
+**Ordered technical steps (commands + phases):** [START-HERE.md](START-HERE.md). This file is a **weekly narrative** only — not a second source of truth for sequence.
+
 Assume **3–4 sessions per week**, **1.5–2.5 hours** each (or two intensive weekend blocks).
 
 ## Week 1 — Kubernetes platform

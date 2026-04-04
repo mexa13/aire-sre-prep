@@ -27,7 +27,14 @@ hey -n 500 -c 20 -m POST -T "application/json" \
   http://fake-llm.aire-prep.local/v1/chat/completions
 ```
 
-Record **p95 / error %** and a one-line **draft SLO** (e.g. “95% of stub requests complete under 500 ms”).
+## Recorded runs (fill after you execute)
+
+| Date | Tool | p95 / typical total_time | Errors % | Draft SLO (one line) |
+|------|------|---------------------------|----------|----------------------|
+| _example_ | curl | ~0.05s | 0% | 99% stub requests complete under 300 ms (lab only) |
+| | | | | |
+
+**Draft SLO (lab, edit):** “For the **fake-llm** stub behind ingress, **99%** of `POST /v1/chat/completions` complete **under 500 ms** total client time under idle cluster conditions.”
 
 ## Error budget (idea)
 

@@ -1,0 +1,7 @@
+# Optional TLS lab: not part of default apps kustomization.
+# Apply after: make install-cert-manager && kubectl apply -k manifests/cert-lab/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - clusterissuer-selfsigned.yaml
+  - certificate-fake-llm.yaml

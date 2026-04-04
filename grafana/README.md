@@ -1,5 +1,7 @@
 # Grafana dashboards (prep lab)
 
+**When in the prep path:** [docs/START-HERE.md](../docs/START-HERE.md) **Phase G — Grafana dashboards**.
+
 JSON exports for import into Grafana bundled with `kube-prometheus-stack`.
 
 ## Import

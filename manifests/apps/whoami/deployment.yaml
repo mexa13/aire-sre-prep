@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: whoami
+        # Prep: small Git-visible change for Argo rollback drill (see docs/GITOPS-ROLLBACK-DRILL.md).
+        aire-prep.io/gitops-drill: step7-example
     spec:
       containers:
         - name: whoami

@@ -4,10 +4,18 @@ Goal: one **UI** where you can relate traces / spans to eval-style signals. Upst
 
 ## Option A — Phoenix locally (Docker)
 
-Refer to the current [Arize Phoenix docs](https://docs.arize.com/phoenix) for the one-line Docker run. In prep, you can:
+Refer to the current [Arize Phoenix docs](https://docs.arize.com/phoenix) for the latest image and ports. A typical local run (verify tag on Docker Hub / docs before use):
 
-1. Run Phoenix on the host or in Docker Desktop.
-2. Point **fake-llm** or a small Python script at Phoenix’s OTLP/HTTP endpoint (if supported in your version) **or** use the Phoenix SDK examples for a minimal experiment.
+```bash
+docker run --rm -p 6006:6006 arizephoenix/phoenix:latest
+```
+
+Open the UI URL shown in container logs (often `http://localhost:6006`).
+
+Then either:
+
+1. Point a small Python script using the Phoenix SDK at this instance, or  
+2. Point **OTLP** from a test app if your Phoenix version exposes OTLP on a documented port.
 
 ## Option B — OpenInference in cluster
 
