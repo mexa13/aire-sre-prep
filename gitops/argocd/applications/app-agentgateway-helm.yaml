@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: agentgateway-crds-helm
+  name: agentgateway-helm
   namespace: argocd
 spec:
   destination:
@@ -9,9 +9,14 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: agentgateway-crds
+    chart: agentgateway
     helm:
       skipCrds: false
+      parameters:
+      - name: controller.image.pullPolicy
+        value: "Always"
+      - name: controller.extraEnv.KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES
+        value: "true"
     repoURL: cr.agentgateway.dev/charts
     targetRevision: v1.0.1
   syncPolicy:
@@ -22,7 +27,4 @@ spec:
       # but not in the git source (default is false).
       selfHeal: true 
     syncOptions:
-    - CreateNamespace=true
-    # Large Agent Gateway CRDs exceed the ~256Ki annotation limit for client-side apply
-    # (kubectl.kubernetes.io/last-applied-configuration). Server-side apply avoids that.
-    - ServerSideApply=true
+    - CreateNamespace=true 

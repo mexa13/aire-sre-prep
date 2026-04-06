@@ -42,6 +42,15 @@ kubectl port-forward svc/argocd-server -n argocd 8080:80
 
 ## Register Applications
 
+**Adding a new `Application` YAML file in Git is not enough.** Argo CD only shows an app after the `Application` object exists **in the cluster** (`argocd` namespace). `git commit` / `git push` do not create that object. From the repo root (correct `kubectl` context):
+
+```bash
+kubectl apply -f gitops/argocd/applications/
+# or: make apply-argocd-apps
+```
+
+Re-run this whenever you add or change an Application manifest. (An **app-of-apps** setup could sync Applications from Git instead; this prep repo does not enable that by default.)
+
 1. Push this repo (or your copy) to GitHub.
 2. In `gitops/argocd/applications/*.yaml`, replace `mexa13/aire-sre-prep` with your path.
 3. **Important:** The `fake-llm:prep` image is not built by Argo. Load it into kind before sync, or switch the Deployment to an image from a registry you control:
@@ -57,6 +66,25 @@ kubectl port-forward svc/argocd-server -n argocd 8080:80
    ```
 
    Or apply manifests one by one if you prefer.
+
+## Troubleshooting
+
+### `metadata.annotations: Too long` on CRDs (e.g. Agent Gateway)
+
+Some charts ship **very large** CRD manifests. Client-side `kubectl apply` stores the full object in `kubectl.kubernetes.io/last-applied-configuration`, which **must be under 256KiB** per annotation — sync then fails.
+
+**Fix:** enable **server-side apply** for that Application:
+
+```yaml
+spec:
+  syncPolicy:
+    syncOptions:
+      - ServerSideApply=true
+```
+
+Example: [gitops/argocd/applications/app-agentgateway-CRD-helm.yaml](../gitops/argocd/applications/app-agentgateway-CRD-helm.yaml). Re-apply the Application, then **Refresh** + **Sync** in the UI.
+
+**Fallback:** install CRDs once with Helm/CLI outside Argo, then set `helm.skipCrds: true` on the Argo Application for the non-CRD chart.
 
 ## Next: after apps are synced
 
