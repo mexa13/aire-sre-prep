@@ -1,0 +1,65 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: agentgateway-smoke
+  namespace: agentgateway-system
+spec:
+  gatewayClassName: agentgateway
+  listeners:
+    - name: http
+      protocol: HTTP
+      # Agent Gateway GatewayClass advertises GatewayPort8080 support.
+      port: 8080
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: fake-llm-via-agentgateway
+  namespace: aire-prep
+spec:
+  parentRefs:
+    - name: agentgateway-smoke
+      namespace: agentgateway-system
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: fake-llm
+          port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentgateway-smoke-proxy
+  namespace: aire-prep
+spec:
+  type: ExternalName
+  externalName: agentgateway-smoke.agentgateway-system.svc.cluster.local
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agentgateway-smoke
+  namespace: aire-prep
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: agw-fake-llm.aire-prep.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: agentgateway-smoke-proxy
+                port:
+                  number: 8080

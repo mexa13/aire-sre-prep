@@ -32,7 +32,7 @@ If you still see the error, check no second replica or autoscaling: `kubectl get
 kind maps **80**/**443** on the host to ingress-nginx ([cluster/kind-config.yaml](../cluster/kind-config.yaml)). Add to **`/etc/hosts`**:
 
 ```text
-127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local argocd.aire-prep.local
+127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local argocd.aire-prep.local mcp.aire-prep.local agw-mcp.aire-prep.local
 ```
 
 Skip `argocd.aire-prep.local` until you run `make install-argocd`.
@@ -48,6 +48,8 @@ Skip `argocd.aire-prep.local` until you run `make install-argocd`.
 | http://alertmanager.aire-prep.local | Alertmanager UI |
 | http://jaeger.aire-prep.local | Jaeger UI |
 | http://argocd.aire-prep.local | Argo CD UI (HTTP; `configs.params.server.insecure` in [helm/argocd-values.yaml](../helm/argocd-values.yaml)) |
+| http://mcp.aire-prep.local/mcp | Direct in-cluster MCP endpoint |
+| http://agw-mcp.aire-prep.local/mcp | Same MCP endpoint routed via Agent Gateway |
 
 **Existing cluster:** after `git pull`, re-apply observability and upgrade Helm releases so Ingress objects exist:
 

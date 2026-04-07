@@ -41,15 +41,38 @@ Failure / follow-up: (ARM image, CRD conflicts, LLM API key required, etc.)
 
 ---
 
-## Agent Gateway (copy block if you smoke-test it)
+## Agent Gateway (completed smoke on this repo)
 
 ```text
 Tool: Agent Gateway
-Version / chart / image:
+Version / chart / image: chart agentgateway v1.0.1, chart agentgateway-crds v1.0.1, controller image cr.agentgateway.dev/controller:v1.0.1
 Install command(s):
-Single test command: (e.g. curl to routed endpoint with auth header)
+  kubectl apply -f gitops/argocd/applications/app-agentgateway-CRD-helm.yaml
+  kubectl apply -f gitops/argocd/applications/app-agentgateway-helm.yaml
+  make apply-argocd-apps
+  kubectl get applications.argoproj.io -n argocd
+
+  # Route smoke path in this repo
+  kubectl apply -f manifests/agentgateway/smoke-fake-llm.yaml
+
+Single test command:
+  curl --resolve agw-fake-llm.aire-prep.local:80:127.0.0.1 \
+    http://agw-fake-llm.aire-prep.local/health
+  # expected: {"status":"ok"}
+
+Evidence command:
+  kubectl logs -n agentgateway-system deploy/agentgateway-smoke --since=5m | grep "request gateway="
+
 Failure / follow-up:
+  - CRD sync failed with metadata.annotations too long (~256Ki kubectl last-applied annotation limit).
+  - Fix: set sync option ServerSideApply=true in app-agentgateway-CRD-helm.yaml.
+  - Initial route tests returned "route not found" when hostname constraints were present; using the minimal route without hostnames resolved matching in this prep setup.
 ```
+
+Files used for this smoke:
+- `manifests/agentgateway/smoke-fake-llm.yaml`
+- `gitops/argocd/applications/app-agentgateway-CRD-helm.yaml`
+- `gitops/argocd/applications/app-agentgateway-helm.yaml`
 
 ---
 

@@ -26,7 +26,7 @@ ingress-nginx:
 cert-manager:
 kube-prometheus-stack:
 kagent: (after COURSE-TOOLS-SMOKE)
-agentgateway:
+agentgateway: chart agentgateway=v1.0.1, chart agentgateway-crds=v1.0.1, controller image=cr.agentgateway.dev/controller:v1.0.1
 llm-d:
 kmcp:
 google-adk:

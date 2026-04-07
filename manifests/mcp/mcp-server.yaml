@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mcp-server-code
+  namespace: aire-prep
+data:
+  main.py: |
+    #!/usr/bin/env python3
+    import os
+    from mcp.server.fastmcp import FastMCP
+
+    MCP_TRANSPORT = os.getenv("MCP_TRANSPORT", "stdio").strip().lower()
+    MCP_HOST = os.getenv("MCP_HOST", "127.0.0.1")
+    MCP_PORT = int(os.getenv("MCP_PORT", "8000"))
+    MCP_MOUNT_PATH = os.getenv("MCP_MOUNT_PATH", "/")
+    MCP_STREAMABLE_HTTP_PATH = os.getenv("MCP_STREAMABLE_HTTP_PATH", "/mcp")
+
+    mcp = FastMCP(
+        "aire-prep-lab",
+        host=MCP_HOST,
+        port=MCP_PORT,
+        mount_path=MCP_MOUNT_PATH,
+        streamable_http_path=MCP_STREAMABLE_HTTP_PATH,
+    )
+
+    @mcp.tool()
+    def echo(text: str) -> str:
+        return text
+
+    @mcp.tool()
+    def add(a: int, b: int) -> int:
+        return a + b
+
+    if __name__ == "__main__":
+        if MCP_TRANSPORT == "streamable-http":
+            mcp.run(transport="streamable-http")
+        elif MCP_TRANSPORT == "sse":
+            mcp.run(transport="sse")
+        else:
+            mcp.run(transport="stdio")
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-server
+  namespace: aire-prep
+  labels:
+    app.kubernetes.io/name: mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mcp-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mcp-server
+    spec:
+      containers:
+        - name: mcp-server
+          image: python:3.12-slim
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              pip install --no-cache-dir "mcp>=1.2.0" && \
+              python /app/main.py
+          env:
+            - name: MCP_TRANSPORT
+              value: streamable-http
+            - name: MCP_HOST
+              value: 0.0.0.0
+            - name: MCP_PORT
+              value: "8081"
+            - name: MCP_STREAMABLE_HTTP_PATH
+              value: /mcp
+          ports:
+            - containerPort: 8081
+              name: http
+          volumeMounts:
+            - name: app-code
+              mountPath: /app
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: app-code
+          configMap:
+            name: mcp-server-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-server
+  namespace: aire-prep
+spec:
+  selector:
+    app.kubernetes.io/name: mcp-server
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-server
+  namespace: aire-prep
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: mcp.aire-prep.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mcp-server
+                port:
+                  number: 8081

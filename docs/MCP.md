@@ -149,6 +149,46 @@ Use **absolute paths** on your machine:
 }
 ```
 
+## Kubernetes + Agent Gateway wiring (this repo)
+
+The local `mcp-server/main.py` is stdio by default, but it can also run as HTTP MCP:
+
+```bash
+MCP_TRANSPORT=streamable-http MCP_HOST=0.0.0.0 MCP_PORT=8081 python main.py
+```
+
+This repo now includes manifests to run MCP in-cluster and route via Agent Gateway:
+
+- `manifests/mcp/mcp-server.yaml`
+  - Deploys `mcp-server` in `aire-prep`
+  - Exposes direct ingress: `http://mcp.aire-prep.local/mcp`
+- `manifests/agentgateway/smoke-mcp-via-agentgateway.yaml`
+  - Adds Agent Gateway `HTTPRoute` path `/mcp` -> `mcp-server:8081`
+  - Exposes routed ingress: `http://agw-mcp.aire-prep.local/mcp`
+
+Apply and check:
+
+```bash
+kubectl apply -f manifests/mcp/mcp-server.yaml
+kubectl apply -f manifests/agentgateway/smoke-mcp-via-agentgateway.yaml
+kubectl rollout status deployment/mcp-server -n aire-prep
+```
+
+Smoke probes (these are expected to return `406 Not Acceptable` for plain browser/curl because MCP expects specific headers like `Accept: text/event-stream`):
+
+```bash
+curl -i --resolve mcp.aire-prep.local:80:127.0.0.1 http://mcp.aire-prep.local/mcp
+curl -i --resolve agw-mcp.aire-prep.local:80:127.0.0.1 http://agw-mcp.aire-prep.local/mcp
+```
+
+Agent Gateway evidence:
+
+```bash
+kubectl logs -n agentgateway-system deploy/agentgateway-smoke --since=5m
+```
+
+Look for a line with `route=aire-prep/mcp-via-agentgateway`.
+
 ## Prep goals
 
 - **`echo` / `add`** succeed from the client.  

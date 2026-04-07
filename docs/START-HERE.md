@@ -64,7 +64,7 @@ make bootstrap-lab
 `/etc/hosts` (covers sample apps + monitoring + Jaeger after `bootstrap-lab`; add Argo in Phase D):
 
 ```text
-127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local
+127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local mcp.aire-prep.local agw-mcp.aire-prep.local
 ```
 
 After **Phase D**, append: `argocd.aire-prep.local` to the same line (or add a second line). Full URL map: [KIND-NOTES.md](KIND-NOTES.md#lab-hostnames-ingress).
