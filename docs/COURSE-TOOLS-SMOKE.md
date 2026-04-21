@@ -51,9 +51,8 @@ Install command(s):
   kubectl apply -f gitops/argocd/applications/app-agentgateway-helm.yaml
   make apply-argocd-apps
   kubectl get applications.argoproj.io -n argocd
-
-  # Route smoke path in this repo
-  kubectl apply -f manifests/agentgateway/smoke-fake-llm.yaml
+  # make apply-argocd-apps also applies Agent Gateway smoke manifests:
+  # smoke-fake-llm, smoke-mcp-via-agentgateway, ui-ingress
 
 Single test command:
   curl --resolve agw-fake-llm.aire-prep.local:80:127.0.0.1 \
@@ -63,14 +62,46 @@ Single test command:
 Evidence command:
   kubectl logs -n agentgateway-system deploy/agentgateway-smoke --since=5m | grep "request gateway="
 
+Domain verification commands (MCP direct + via Agent Gateway):
+  curl -i http://mcp.aire-prep.local/mcp
+  curl -i http://agw-mcp.aire-prep.local/mcp
+  # expected for plain curl: 406 Not Acceptable (MCP endpoint requires protocol headers/session)
+
+Agent Gateway admin UI (domain):
+  # add agw-ui.aire-prep.local to /etc/hosts (see docs/KIND-NOTES.md)
+  # open:
+  http://agw-ui.aire-prep.local/ui
+
+Real MCP client smoke via domain:
+  /Users/mexa/Documents/projects/NYX/aire-sre-prep/mcp-server/.venv/bin/python - <<'PY'
+  import asyncio
+  from mcp.client.streamable_http import streamablehttp_client
+  from mcp.client.session import ClientSession
+
+  URL = "http://agw-mcp.aire-prep.local/mcp"
+
+  async def main():
+      async with streamablehttp_client(URL, timeout=20, sse_read_timeout=60) as (r, w, _):
+          async with ClientSession(r, w) as s:
+              await s.initialize()
+              tools = await s.list_tools()
+              print("tools:", [t.name for t in tools.tools])
+              print("echo:", await s.call_tool("echo", {"text": "domain-smoke-ok"}))
+              print("add:", await s.call_tool("add", {"a": 21, "b": 21}))
+
+  asyncio.run(main())
+  PY
+
 Failure / follow-up:
   - CRD sync failed with metadata.annotations too long (~256Ki kubectl last-applied annotation limit).
   - Fix: set sync option ServerSideApply=true in app-agentgateway-CRD-helm.yaml.
   - Initial route tests returned "route not found" when hostname constraints were present; using the minimal route without hostnames resolved matching in this prep setup.
+  - Agent Gateway admin UI listens on localhost in the gateway pod. `manifests/agentgateway/ui-ingress.yaml` adds an in-cluster forwarder and ingress so UI is available at `http://agw-ui.aire-prep.local/ui`.
 ```
 
 Files used for this smoke:
 - `manifests/agentgateway/smoke-fake-llm.yaml`
+- `manifests/agentgateway/ui-ingress.yaml`
 - `gitops/argocd/applications/app-agentgateway-CRD-helm.yaml`
 - `gitops/argocd/applications/app-agentgateway-helm.yaml`
 

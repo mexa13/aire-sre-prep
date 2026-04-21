@@ -64,7 +64,7 @@ make bootstrap-lab
 `/etc/hosts` (covers sample apps + monitoring + Jaeger after `bootstrap-lab`; add Argo in Phase D):
 
 ```text
-127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local mcp.aire-prep.local agw-mcp.aire-prep.local
+127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local mcp.aire-prep.local agw-mcp.aire-prep.local agw-ui.aire-prep.local
 ```
 
 After **Phase D**, append: `argocd.aire-prep.local` to the same line (or add a second line). Full URL map: [KIND-NOTES.md](KIND-NOTES.md#lab-hostnames-ingress).
@@ -97,8 +97,11 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 1. Add `argocd.aire-prep.local` to `/etc/hosts` (see Phase C). Open **`http://argocd.aire-prep.local`** → `admin` + password above.  
    Fallback: `kubectl port-forward svc/argocd-server -n argocd 8080:80` → `http://localhost:8080`.  
 2. Set `repoURL` in `gitops/argocd/applications/*.yaml`.  
-3. `make apply-argocd-apps`  
+3. `make apply-argocd-apps` (also applies Agent Gateway smoke routes + UI ingress)  
 4. `ImagePullBackOff` on fake-llm → `make load-fake-llm` → **Refresh** in Argo.
+5. Optional Agent Gateway admin UI:
+   - `kubectl apply -f manifests/agentgateway/ui-ingress.yaml`
+   - open `http://agw-ui.aire-prep.local/ui` (domain from Phase C hosts line).
 
 **Way B only:** if you did **not** run Phase C, your **first** successful `curl` happens **after** apps show Synced/Healthy here.
 

@@ -6,7 +6,7 @@ KIND_CONFIG ?= cluster/kind-config.yaml
 .PHONY: cluster-up cluster-down install-platform bootstrap-lab \
 	install-metrics-server install-ingress install-cert-manager \
 	install-prometheus install-otel-jaeger install-argocd apply-argocd-apps \
-	apply-apps build-fake-llm load-fake-llm argocd-install help
+	apply-apps apply-agentgateway-smokes build-fake-llm load-fake-llm argocd-install help
 
 help:
 	@echo "Targets: cluster-up cluster-down install-platform bootstrap-lab install-* install-argocd apply-apps"
@@ -102,6 +102,13 @@ install-argocd:
 # Apply Argo Applications (edit repoURL in gitops/argocd/applications/*.yaml first; ensure fake-llm image is loaded).
 apply-argocd-apps:
 	kubectl apply -f gitops/argocd/applications/
+	$(MAKE) apply-agentgateway-smokes
+
+# Agent Gateway smoke routes and UI ingress for local lab domains.
+apply-agentgateway-smokes:
+	kubectl apply -f manifests/agentgateway/smoke-fake-llm.yaml
+	kubectl apply -f manifests/agentgateway/smoke-mcp-via-agentgateway.yaml
+	kubectl apply -f manifests/agentgateway/ui-ingress.yaml
 
 # Backward-compatible alias
 argocd-install: install-argocd
