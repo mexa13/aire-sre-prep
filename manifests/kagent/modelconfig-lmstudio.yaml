@@ -4,12 +4,15 @@ metadata:
   name: lmstudio-openai
   namespace: kagent
 spec:
+  # kagent sends this secret value as Authorization: Bearer <token>.
+  # For LM Studio, use any non-empty value unless your gateway enforces auth.
   apiKeySecret: kagent-openai
   apiKeySecretKey: OPENAI_API_KEY
   provider: OpenAI
   # Replace with the model ID that LM Studio exposes in /v1/models.
-  model: qwen3-coder
+  # Use the exact model id from LM Studio /v1/models (not a shortened alias).
+  model: qwen/qwen3.5-9b
   openAI:
     # For kind on Docker Desktop, host.docker.internal reaches your laptop.
     # Adjust host/port if your LM Studio server listens elsewhere.
-    baseUrl: http://host.docker.internal:1234/v1
+    baseUrl: http://192.168.18.43:1234/v1

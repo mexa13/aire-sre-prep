@@ -48,6 +48,21 @@ Single test command (one tool call):
 LM Studio option (OpenAI-compatible):
   kubectl apply -f manifests/kagent/modelconfig-lmstudio.yaml
   # then choose model config kagent/lmstudio-openai in the UI
+  # if auth header is required:
+  export OPENAI_API_KEY="<lm-studio-token-or-placeholder>"
+  kubectl create secret generic kagent-openai -n kagent \
+    --from-literal OPENAI_API_KEY="$OPENAI_API_KEY" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+Final smoke commands:
+  kubectl get applications.argoproj.io -n argocd | grep kagent
+  kubectl get pods -n kagent
+  kubectl get modelconfigs.kagent.dev -n kagent default-model-config -o yaml | grep -E "model:|baseUrl:"
+  kubectl run lmstudio-models-probe --rm -it --restart=Never -n kagent --image=curlimages/curl:8.7.1 -- \
+    sh -lc 'curl -sS -H "Authorization: Bearer '"$OPENAI_API_KEY"'" http://192.168.18.43:1234/v1/models'
+  kagent invoke -t "What Helm charts are in my cluster?" --agent helm-agent
+  # optional resilience test:
+  kagent invoke -t "Delete one existing pod whose name starts with fake-llm- in namespace aire-prep, then verify replacement pod is Running. Show before/after names." --agent k8s-agent
 
 Failure / follow-up:
   - kagent pods not Ready: check kagent namespace events and controller logs.

@@ -23,7 +23,10 @@ spec:
         - name: providers.openAI.apiKeySecretKey
           value: "OPENAI_API_KEY"
         - name: providers.openAI.model
-          value: "gpt-4.1-mini"
+          # Use exact LM Studio model ID to avoid auto-loading a second profile.
+          value: "qwen/qwen3.5-9b"
+        - name: providers.openAI.config.baseUrl
+          value: "http://192.168.18.43:1234/v1"
   syncPolicy:
     automated:
       prune: true

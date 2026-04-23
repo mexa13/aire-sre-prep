@@ -112,6 +112,75 @@ kubectl apply -f manifests/kagent/modelconfig-lmstudio.yaml
 
 Then in kagent UI, choose model config `kagent/lmstudio-openai` when creating/updating the agent.
 
+If your LM Studio endpoint expects auth header, keep a token in the secret:
+
+```bash
+export OPENAI_API_KEY="<lm-studio-token-or-placeholder>"
+kubectl create secret generic kagent-openai -n kagent \
+  --from-literal OPENAI_API_KEY="$OPENAI_API_KEY" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
 Notes:
 - Replace `model` in `manifests/kagent/modelconfig-lmstudio.yaml` with exact LM Studio model ID from `/v1/models`.
 - For reliable tool-use/function-calling, prefer strong instruction-tuned models. For local tests, a Qwen coder model can work, but cloud `gpt-4.1-mini` is usually more predictable for first smoke.
+- `n_ctx` / context length is controlled by LM Studio model load settings, not by kagent `ModelConfig`.
+- If kagent requests `qwen3.5-9b` but your loaded model id is `qwen/qwen3.5-9b`, LM Studio can auto-load a second model profile (often with default 4096 context). Always use the exact id.
+
+---
+
+## 6) Final smoke (LM Studio + kagent)
+
+```bash
+# 1) Argo + workloads
+kubectl get applications.argoproj.io -n argocd | grep kagent
+kubectl get pods -n kagent
+
+# 2) Model config used by built-in agents
+kubectl get modelconfigs.kagent.dev -n kagent default-model-config -o yaml | grep -E "model:|baseUrl:"
+
+# 3) LM Studio reachability from cluster (with Bearer token)
+export OPENAI_API_KEY="<lm-studio-token-or-placeholder>"
+kubectl run lmstudio-models-probe --rm -it --restart=Never -n kagent \
+  --image=curlimages/curl:8.7.1 -- \
+  sh -lc 'curl -sS -H "Authorization: Bearer '"$OPENAI_API_KEY"'" http://192.168.18.43:1234/v1/models'
+
+# 4) Chat completion probe from cluster (replace model if needed)
+kubectl run lmstudio-chat-probe --rm -it --restart=Never -n kagent \
+  --image=curlimages/curl:8.7.1 -- \
+  sh -lc 'curl -sS -H "Authorization: Bearer '"$OPENAI_API_KEY"'" -H "Content-Type: application/json" \
+  http://192.168.18.43:1234/v1/chat/completions \
+  -d "{\"model\":\"qwen3.5-9b\",\"messages\":[{\"role\":\"user\",\"content\":\"say ok\"}]}"'
+
+# 5) kagent tool call smoke
+kagent invoke -t "What Helm charts are in my cluster?" --agent helm-agent
+```
+
+---
+
+## 7) Optional resilience smoke: delete pod -> auto-recreate
+
+Use `k8s-agent` for this test.
+
+Prompt in kagent UI:
+
+```text
+Delete one existing pod whose name starts with fake-llm- in namespace aire-prep, then verify replacement pod is Running. Show before/after names.
+```
+
+Optional CLI equivalent:
+
+```bash
+kagent invoke -t "Delete one existing pod whose name starts with fake-llm- in namespace aire-prep, then verify replacement pod is Running. Show before/after names." --agent k8s-agent
+```
+
+Manual verification (host kubectl):
+
+```bash
+kubectl get pods -n aire-prep -l app=fake-llm -w
+```
+
+Success criteria:
+- One `fake-llm` pod is deleted.
+- Deployment/ReplicaSet creates a new pod automatically.
+- New pod reaches `Running` state.
