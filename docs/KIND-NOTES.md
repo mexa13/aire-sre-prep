@@ -32,7 +32,7 @@ If you still see the error, check no second replica or autoscaling: `kubectl get
 kind maps **80**/**443** on the host to ingress-nginx ([cluster/kind-config.yaml](../cluster/kind-config.yaml)). Add to **`/etc/hosts`**:
 
 ```text
-127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local argocd.aire-prep.local mcp.aire-prep.local agw-mcp.aire-prep.local agw-ui.aire-prep.local
+127.0.0.1 whoami.aire-prep.local fake-llm.aire-prep.local grafana.aire-prep.local prometheus.aire-prep.local alertmanager.aire-prep.local jaeger.aire-prep.local argocd.aire-prep.local mcp.aire-prep.local agw-mcp.aire-prep.local agw-ui.aire-prep.local kagent.aire-prep.local
 ```
 
 Skip `argocd.aire-prep.local` until you run `make install-argocd`.
@@ -51,6 +51,7 @@ Skip `argocd.aire-prep.local` until you run `make install-argocd`.
 | http://mcp.aire-prep.local/mcp | Direct in-cluster MCP endpoint |
 | http://agw-mcp.aire-prep.local/mcp | Same MCP endpoint routed via Agent Gateway |
 | http://agw-ui.aire-prep.local/ui | Agent Gateway admin UI via ingress (`manifests/agentgateway/ui-ingress.yaml`) |
+| http://kagent.aire-prep.local | kagent UI via ingress (`manifests/kagent/ui-ingress.yaml`) |
 
 ### Agent Gateway UI (domain via ingress)
 

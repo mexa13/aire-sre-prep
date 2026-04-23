@@ -15,28 +15,44 @@ If a link breaks, search the **GitHub org/repo** name in the table — projects 
 
 ---
 
-## Kagent (recommended first smoke)
-
-Use the links in the table above. **Prep goal:** follow the current **Quick start** for your environment (kind-friendly if offered). Record what you actually ran below.
-
-**Template (fill on your machine)**
+## Kagent (completed smoke on this repo)
 
 ```text
 Tool: Kagent
-Version / chart / image: (e.g. release tag from GitHub / helm chart version)
+Version / chart / image: chart kagent=v0.8.6, chart kagent-crds=v0.8.6
+
 Install command(s):
-Single test command:
+  kubectl apply -f gitops/argocd/applications/app-kagent-CRD-helm.yaml
+  kubectl apply -f gitops/argocd/applications/app-kagent-helm.yaml
+
+  export OPENAI_API_KEY="<your-openai-key>"
+  kubectl create secret generic kagent-openai -n kagent \
+    --from-literal OPENAI_API_KEY="$OPENAI_API_KEY" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+  kubectl get applications.argoproj.io -n argocd | grep kagent
+  kubectl get pods -n kagent
+
+  # UI via domain
+  make apply-kagent-smokes
+  # add kagent.aire-prep.local to /etc/hosts
+  # open http://kagent.aire-prep.local
+
+CRDs installed:
+  kubectl get crd | grep -i kagent
+
+Single test command (one tool call):
+  kagent invoke -t "What Helm charts are in my cluster?" --agent helm-agent
+  # expected: response includes Helm tool output (release/chart list)
+
+LM Studio option (OpenAI-compatible):
+  kubectl apply -f manifests/kagent/modelconfig-lmstudio.yaml
+  # then choose model config kagent/lmstudio-openai in the UI
+
 Failure / follow-up:
-```
-
-**Example stub (replace with your run output)**
-
-```text
-Tool: Kagent
-Version / chart / image: see VERSION-PINS.md → kagent
-Install command(s): (from upstream docs — often helm or kubectl apply)
-Single test command: (e.g. CLI/UI agent invocation from their quickstart)
-Failure / follow-up: (ARM image, CRD conflicts, LLM API key required, etc.)
+  - kagent pods not Ready: check kagent namespace events and controller logs.
+  - Empty/failed responses: verify model provider config and API key secret.
+  - For local LM Studio, ensure in-cluster reachability to host.docker.internal:1234.
 ```
 
 ---

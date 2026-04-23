@@ -6,7 +6,7 @@ KIND_CONFIG ?= cluster/kind-config.yaml
 .PHONY: cluster-up cluster-down install-platform bootstrap-lab \
 	install-metrics-server install-ingress install-cert-manager \
 	install-prometheus install-otel-jaeger install-argocd apply-argocd-apps \
-	apply-apps apply-agentgateway-smokes build-fake-llm load-fake-llm argocd-install help
+	apply-apps apply-agentgateway-smokes apply-kagent-smokes build-fake-llm load-fake-llm argocd-install help
 
 help:
 	@echo "Targets: cluster-up cluster-down install-platform bootstrap-lab install-* install-argocd apply-apps"
@@ -109,6 +109,11 @@ apply-agentgateway-smokes:
 	kubectl apply -f manifests/agentgateway/smoke-fake-llm.yaml
 	kubectl apply -f manifests/agentgateway/smoke-mcp-via-agentgateway.yaml
 	kubectl apply -f manifests/agentgateway/ui-ingress.yaml
+
+# kagent smoke exposure (UI ingress).
+apply-kagent-smokes:
+	kubectl create namespace kagent --dry-run=client -o yaml | kubectl apply -f -
+	kubectl apply -f manifests/kagent/ui-ingress.yaml
 
 # Backward-compatible alias
 argocd-install: install-argocd

@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kagent-helm
+  namespace: argocd
+spec:
+  destination:
+    namespace: kagent
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: kagent
+    repoURL: ghcr.io/kagent-dev/kagent/helm
+    targetRevision: 0.8.6
+    helm:
+      releaseName: kagent
+      skipCrds: true
+      parameters:
+        - name: providers.default
+          value: "openAI"
+        - name: providers.openAI.apiKeySecretRef
+          value: "kagent-openai"
+        - name: providers.openAI.apiKeySecretKey
+          value: "OPENAI_API_KEY"
+        - name: providers.openAI.model
+          value: "gpt-4.1-mini"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

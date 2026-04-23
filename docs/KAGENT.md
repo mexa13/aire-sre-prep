@@ -1,0 +1,117 @@
+# Kagent smoke (prep lab)
+
+`kagent` is a Kubernetes-native agent framework: it runs agent controllers in-cluster, lets you create agents in UI/CLI, and executes tools (kubectl/helm/kmcp etc.) from those agents.
+
+Use this doc when you do the **Kagent** row in [COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md).
+
+---
+
+## 1) Install via Argo CD (Helm charts)
+
+Apply Argo `Application` objects:
+
+```bash
+kubectl apply -f gitops/argocd/applications/app-kagent-CRD-helm.yaml
+kubectl apply -f gitops/argocd/applications/app-kagent-helm.yaml
+```
+
+Create OpenAI key secret used by the chart:
+
+```bash
+export OPENAI_API_KEY="<your-openai-key>"
+kubectl create secret generic kagent-openai -n kagent \
+  --from-literal OPENAI_API_KEY="$OPENAI_API_KEY" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Sync/check:
+
+```bash
+kubectl get applications.argoproj.io -n argocd | rg kagent
+kubectl get pods -n kagent
+```
+
+---
+
+## 2) Expose UI by domain
+
+Apply ingress:
+
+```bash
+make apply-kagent-smokes
+```
+
+Add host in `/etc/hosts` (see [KIND-NOTES.md](KIND-NOTES.md#lab-hostnames-ingress)):
+
+```text
+127.0.0.1 kagent.aire-prep.local
+```
+
+Open:
+
+```text
+http://kagent.aire-prep.local
+```
+
+Fallback:
+
+```bash
+kubectl port-forward -n kagent svc/kagent-ui 8082:8080
+# http://localhost:8082
+```
+
+---
+
+## 3) Prove CRDs installed
+
+```bash
+kubectl get crd | grep -i kagent
+```
+
+Optional full count:
+
+```bash
+kubectl get crd | grep -ic kagent
+```
+
+---
+
+## 4) Smoke: one agent + one tool call
+
+The quick smoke is to use built-in `helm-agent` and trigger a Helm tool call.
+
+Install CLI (if needed):
+
+```bash
+brew install kagent
+```
+
+Run:
+
+```bash
+kagent invoke -t "What Helm charts are in my cluster?" --agent helm-agent
+```
+
+Success criteria:
+- Response includes chart/release data (tool output, not only generic text).
+- In UI chat details, you can expand Arguments/Results for the tool execution.
+
+---
+
+## 5) LM Studio (OpenAI-compatible) option
+
+Yes, you can use LM Studio instead of OpenAI cloud.
+
+1. Start LM Studio local server (OpenAI-compatible API), usually `http://host.docker.internal:1234/v1` from in-cluster workloads.
+2. Keep secret `kagent-openai` (LM Studio often accepts any placeholder key).
+3. Apply:
+
+```bash
+kubectl apply -f manifests/kagent/modelconfig-lmstudio.yaml
+```
+
+Then in kagent UI, choose model config `kagent/lmstudio-openai` when creating/updating the agent.
+
+Notes:
+- Replace `model` in `manifests/kagent/modelconfig-lmstudio.yaml` with exact LM Studio model ID from `/v1/models`.
+- For reliable tool-use/function-calling, prefer strong instruction-tuned models. For local tests, a Qwen coder model can work, but cloud `gpt-4.1-mini` is usually more predictable for first smoke.

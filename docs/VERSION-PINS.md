@@ -25,7 +25,7 @@ Record Helm chart versions after `helm list` / `helm search repo` so the course 
 ingress-nginx:
 cert-manager:
 kube-prometheus-stack:
-kagent: (after COURSE-TOOLS-SMOKE)
+kagent: chart kagent=v0.8.6, chart kagent-crds=v0.8.6
 agentgateway: chart agentgateway=v1.0.1, chart agentgateway-crds=v1.0.1, controller image=cr.agentgateway.dev/controller:v1.0.1
 llm-d:
 kmcp:

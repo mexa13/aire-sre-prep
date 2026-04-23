@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kagent-ui
+  namespace: kagent
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: kagent.aire-prep.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kagent-ui
+                port:
+                  number: 8080
