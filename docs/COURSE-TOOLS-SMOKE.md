@@ -138,14 +138,58 @@ Files used for this smoke:
 
 ---
 
-## llm-d (copy block)
+## llm-d (completed smoke template for this repo)
+
+`llm-d` is a Kubernetes-focused stack for running/serving LLM inference workloads (router + runtime + model serving), with production concerns like scheduling, autoscaling, and observability.
+Full step-by-step guide for this repo: [LLM-D.md](LLM-D.md).
 
 ```text
 Tool: llm-d
 Version / chart / image:
+  Repo commit/tag: <pin exact tag from llm-d docs you used>
+  Runtime image(s): <vllm/sglang/other image tags used in your install>
+
 Install command(s):
-Single test command: (e.g. kubectl get pods / their health check)
-Failure / follow-up: (GPU nodes, image pull, etc.)
+  # 1) follow the official quickstart/install from:
+  #    https://github.com/llm-d/llm-d
+  #    https://www.llm-d.ai/
+  #
+  # 2) keep all resources in dedicated namespace
+  kubectl create namespace llm-d --dry-run=client -o yaml | kubectl apply -f -
+  # then run llm-d install from docs (helm/kustomize/operator path) into this namespace
+  # NOTE: creating namespace alone does NOT create workloads.
+
+Readiness checks (run only AFTER llm-d install is applied):
+  kubectl get pods -n llm-d
+  kubectl get svc -n llm-d
+  kubectl get deploy,statefulset -n llm-d
+  # expected after successful install: controller + inference workload pods become Running/Ready
+
+Single test command (minimum smoke):
+  # required pass in this repo setup: direct decode pod smoke
+  POD=$(kubectl -n llm-d get pod -l llm-d.ai/role=decode -o jsonpath='{.items[0].metadata.name}')
+  kubectl -n llm-d port-forward "pod/${POD}" 18080:8000
+  curl -sS http://127.0.0.1:18080/v1/models
+  curl -sS -X POST http://127.0.0.1:18080/v1/chat/completions -H "Content-Type: application/json" \
+    -d '{"model":"random","messages":[{"role":"user","content":"say smoke-ok"}]}'
+  # optional advanced check: gateway path via infra-sim-inference-gateway service
+
+Evidence commands (write output into your notes):
+  kubectl get pods -n llm-d -o wide
+  kubectl describe pod -n llm-d <one-inference-pod-name>
+  kubectl logs -n llm-d <one-inference-pod-name> --since=5m
+
+CPU/GPU assumption note (required for this course prep):
+  - CPU path: slower, often for functional smoke only.
+  - GPU path: preferred for realistic latency/throughput; document GPU type/count and requested resources.
+  - Record which path you used and why.
+
+Failure / follow-up:
+  - Pods Pending: node selector/toleration/GPU resource mismatch (no compatible node).
+  - ImagePullBackOff: registry/auth/image tag mismatch.
+  - OOMKilled: model too large for allocated memory/VRAM.
+  - 404/invalid model in inference call: wrong model id vs runtime registration.
+  - Health OK but no token output: check provider/runtime args and model mount/download status.
 ```
 
 ---

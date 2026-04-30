@@ -190,7 +190,7 @@ Add the MCP JSON in **Cursor Settings → MCP** so **Cursor** starts `main.py` (
 
 ## Phase K — One course smoke (optional)
 
-[COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md), [KAGENT.md](KAGENT.md), [VERSION-PINS.md](VERSION-PINS.md).
+[COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md), [KAGENT.md](KAGENT.md), [LLM-D.md](LLM-D.md), [VERSION-PINS.md](VERSION-PINS.md).
 
 ---
 
