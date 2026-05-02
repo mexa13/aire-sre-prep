@@ -10,7 +10,7 @@ If a link breaks, search the **GitHub org/repo** name in the table — projects 
 | **Kagent** | Repo: [github.com/kagent-dev/kagent](https://github.com/kagent-dev/kagent) · Docs: [kagent.dev/docs](https://kagent.dev/docs) | Complete **Quick start** so an **agent runs in-cluster** and **one tool call** succeeds; list **CRDs** installed (`kubectl get crd \| grep -i kagent` or per their docs). |
 | **llm-d** | Repo: [github.com/llm-d/llm-d](https://github.com/llm-d/llm-d) · Docs: [llm-d.ai](https://www.llm-d.ai/) | Run the smallest **install / demo** from current docs so **at least one inference-related workload** is `Running` (or their equivalent check); write down **GPU vs CPU** assumptions from the guide. |
 | **kmcp** | Repo: [github.com/kagent-dev/kmcp](https://github.com/kagent-dev/kmcp) · Docs: [kagent.dev/docs/kmcp](https://kagent.dev/docs/kmcp) · Deploy (optional): [Deploy MCP servers](https://kagent.dev/docs/kmcp/deploy/server) | **Ordered lab:** [KMCP.md §2](KMCP.md#2-ordered-lab--do-this-sequence) (stdio MCP → kmcp scaffold → HTTP probe → **kagent UI** + `http://mcp-server.aire-prep.svc.cluster.local:8081/mcp`). No kmcp controller required. |
-| **ADK** | Repo: [github.com/google/adk-python](https://github.com/google/adk-python) · Docs: [Get started (Python)](https://google.github.io/adk-docs/get-started/python/) · Samples: [google/adk-samples](https://github.com/google/adk-samples) | `pip install google-adk`, run **`adk create`** + **`adk run`** on the generated agent (or follow the doc’s hello path); note **API key / model** requirement. |
+| **ADK** | Repo: [github.com/google/adk-python](https://github.com/google/adk-python) · Docs: [Get started (Python)](https://google.github.io/adk-docs/get-started/python/) · Samples: [google/adk-samples](https://github.com/google/adk-samples) | **Ordered lab:** [ADK.md §1](ADK.md#1-ordered-lab-minimum-smoke) — venv, `pip install google-adk`, **`adk create prep_adk_smoke`** (underscores; hyphens invalid) + **`.env`** + optional copy [examples/prep_adk_smoke/agent.py](../examples/prep_adk_smoke/agent.py) → `prep_adk_smoke/agent.py`; **`adk run prep_adk_smoke`**; optional **`adk web`**. |
 | **A2A** | Repo: [github.com/a2aproject/A2A](https://github.com/a2aproject/A2A) (spec + samples; start from README **Documentation** links) | Read **protocol overview** + run or trace **one official sample** from the repo (e.g. under `samples/` if present) or the path linked from README; note **JSON-RPC / Agent Card** takeaway in your notes. |
 
 ---
@@ -235,10 +235,24 @@ Failure / follow-up:
 
 ```text
 Tool: ADK (google-adk)
-Version / chart / image: (pip version)
+Version / chart / image: (pip show google-adk)
 Install command(s):
-Single test command: (e.g. adk run …)
+  cd /tmp && python3 -m venv adk-smoke-venv && source adk-smoke-venv/bin/activate
+  pip install -U pip google-adk
+  adk create prep_adk_smoke
+  echo 'GOOGLE_API_KEY="…"' > prep_adk_smoke/.env   # aistudio.google.com/app/apikey
+  # optional: kubectl lab agent — from aire-sre-prep repo root:
+  #   cp examples/prep_adk_smoke/agent.py /tmp/prep_adk_smoke/agent.py
+Single test command:
+  # cwd = parent of prep_adk_smoke/
+  adk run prep_adk_smoke
+  # optional UI: adk web --port 8000   (same parent cwd)
 Failure / follow-up:
+  - Invalid app name: use prep_adk_smoke (underscores), not prep-adk-smoke
+  - Missing/invalid GOOGLE_API_KEY in prep_adk_smoke/.env
+  - adk run / adk web from wrong cwd (parent of agent folder; adk web often without agent subpath)
+Lab doc: docs/ADK.md
+Example agent: examples/prep_adk_smoke/agent.py
 ```
 
 ---
