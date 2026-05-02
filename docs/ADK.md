@@ -123,6 +123,6 @@ The agent should call tools instead of inventing cluster state. If it answers wi
 ## 4) Relation to other Phase K tools
 
 - **kagent / kmcp / MCP lab:** in-cluster agents and MCP — different stack from ADK CLI.
-- **A2A (next in the smoke table):** protocol-level inter-agent comms — complementary, not a replacement for ADK.
+- **A2A (next in the smoke table):** agent-to-agent protocol — see [A2A.md](A2A.md).
 
-When ADK smoke is done, fill the **ADK (copy block)** in [COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md) and optionally move to **A2A** in the same file.
+When ADK smoke is done, fill the **ADK (copy block)** in [COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md), then continue with **A2A** in [A2A.md](A2A.md).

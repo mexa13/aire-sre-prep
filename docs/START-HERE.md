@@ -190,7 +190,7 @@ Add the MCP JSON in **Cursor Settings → MCP** so **Cursor** starts `main.py` (
 
 ## Phase K — One course smoke (optional)
 
-[COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md), [KAGENT.md](KAGENT.md), [LLM-D.md](LLM-D.md), [KMCP.md](KMCP.md), [ADK.md](ADK.md), [VERSION-PINS.md](VERSION-PINS.md).
+[COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md), [KAGENT.md](KAGENT.md), [LLM-D.md](LLM-D.md), [KMCP.md](KMCP.md), [ADK.md](ADK.md), [A2A.md](A2A.md), [VERSION-PINS.md](VERSION-PINS.md).
 
 ---
 
@@ -216,6 +216,7 @@ Phases **B–C** + **F–G** + **J** = solid baseline. **D–E–H** if you want
 |------|-----|
 | kmcp (course smoke) | [KMCP.md](KMCP.md) |
 | ADK (course smoke) | [ADK.md](ADK.md) |
+| A2A (course smoke) | [A2A.md](A2A.md) |
 | kind / metrics / ingress | [KIND-NOTES.md](KIND-NOTES.md) |
 | Prometheus / Grafana quirks | [PROMETHEUS-METRICS-LAB.md](PROMETHEUS-METRICS-LAB.md) |
 | Argo details | [ARGOCD.md](ARGOCD.md) |

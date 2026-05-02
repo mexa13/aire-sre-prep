@@ -11,7 +11,7 @@ If a link breaks, search the **GitHub org/repo** name in the table — projects 
 | **llm-d** | Repo: [github.com/llm-d/llm-d](https://github.com/llm-d/llm-d) · Docs: [llm-d.ai](https://www.llm-d.ai/) | Run the smallest **install / demo** from current docs so **at least one inference-related workload** is `Running` (or their equivalent check); write down **GPU vs CPU** assumptions from the guide. |
 | **kmcp** | Repo: [github.com/kagent-dev/kmcp](https://github.com/kagent-dev/kmcp) · Docs: [kagent.dev/docs/kmcp](https://kagent.dev/docs/kmcp) · Deploy (optional): [Deploy MCP servers](https://kagent.dev/docs/kmcp/deploy/server) | **Ordered lab:** [KMCP.md §2](KMCP.md#2-ordered-lab--do-this-sequence) (stdio MCP → kmcp scaffold → HTTP probe → **kagent UI** + `http://mcp-server.aire-prep.svc.cluster.local:8081/mcp`). No kmcp controller required. |
 | **ADK** | Repo: [github.com/google/adk-python](https://github.com/google/adk-python) · Docs: [Get started (Python)](https://google.github.io/adk-docs/get-started/python/) · Samples: [google/adk-samples](https://github.com/google/adk-samples) | **Ordered lab:** [ADK.md §1](ADK.md#1-ordered-lab-minimum-smoke) — venv, `pip install google-adk`, **`adk create prep_adk_smoke`** (underscores; hyphens invalid) + **`.env`** + optional copy [examples/prep_adk_smoke/agent.py](../examples/prep_adk_smoke/agent.py) → `prep_adk_smoke/agent.py`; **`adk run prep_adk_smoke`**; optional **`adk web`**. |
-| **A2A** | Repo: [github.com/a2aproject/A2A](https://github.com/a2aproject/A2A) (spec + samples; start from README **Documentation** links) | Read **protocol overview** + run or trace **one official sample** from the repo (e.g. under `samples/` if present) or the path linked from README; note **JSON-RPC / Agent Card** takeaway in your notes. |
+| **A2A** | Repo: [github.com/a2aproject/A2A](https://github.com/a2aproject/A2A) · Docs: [a2a-protocol.org](https://a2a-protocol.org) · Samples: [a2a-samples](https://github.com/a2aproject/a2a-samples) · SDK: [a2a-python](https://github.com/a2aproject/a2a-python) | **Ordered lab:** [A2A.md §2](A2A.md#2-ordered-lab-minimum-smoke--hello-world) — read overview + **Hello World** (`uv run .` + `uv run test_client.py`); note **Agent Card** + **JSON-RPC** vs MCP. |
 
 ---
 
@@ -259,12 +259,25 @@ Example agent: examples/prep_adk_smoke/agent.py
 
 ## A2A (copy block)
 
+Quick explanation and step-by-step lab: [A2A.md](A2A.md).
+
 ```text
-Tool: A2A protocol
-Version / spec / sample commit:
-Commands / URL exercised:
-One-sentence takeaway (Agent Card / task lifecycle):
+Tool: A2A (Agent2Agent protocol)
+Version / spec / sample commit: (git -C /tmp/a2a-samples rev-parse HEAD after clone)
+Install / run:
+  cd /tmp && git clone https://github.com/a2aproject/a2a-samples.git
+  cd a2a-samples/samples/python/agents/helloworld
+  # terminal 1:
+  uv run .
+  # terminal 2:
+  uv run test_client.py
+Single test command: (client completes against local helloworld server)
+One-sentence takeaway:
+  Agent Card = discovery/capabilities; agents collaborate over JSON-RPC (tasks/streaming per spec), unlike MCP which exposes tools to a single client.
 Failure / follow-up:
+  - uv missing → install uv or use pip per sample pyproject
+  - Treat remote Agent Cards as untrusted input (see a2a-samples README disclaimer)
+Lab doc: docs/A2A.md
 ```
 
 ---
