@@ -15,7 +15,7 @@ Record Helm chart versions after `helm list` / `helm search repo` so the course 
 | **kagent** | Git tag / chart version from [github.com/kagent-dev/kagent](https://github.com/kagent-dev/kagent) after smoke test |
 | **agentgateway** | Image tag / chart from [github.com/agentgateway/agentgateway](https://github.com/agentgateway/agentgateway) releases or install manifest |
 | **llm-d** | Release / chart from [github.com/llm-d/llm-d](https://github.com/llm-d/llm-d) after smoke test |
-| **kmcp** | `kmcp version` or release from [github.com/kagent-dev/kmcp](https://github.com/kagent-dev/kmcp) |
+| **kmcp** | `kmcp version` or release from [github.com/kagent-dev/kmcp](https://github.com/kagent-dev/kmcp); install/smoke steps [KMCP.md](KMCP.md) |
 | **google-adk** | `pip show google-adk` after Phase K ADK smoke |
 | **A2A samples** | Git commit or sample path you ran from [github.com/a2aproject/A2A](https://github.com/a2aproject/A2A) (if you do A2A smoke) |
 

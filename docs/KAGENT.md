@@ -184,3 +184,13 @@ Success criteria:
 - One `fake-llm` pod is deleted.
 - Deployment/ReplicaSet creates a new pod automatically.
 - New pod reaches `Running` state.
+
+---
+
+## 8) Optional: attach this lab’s HTTP MCP or use kmcp (no extra cluster install)
+
+The repo already runs **MCP over HTTP** in `aire-prep` (`manifests/mcp/mcp-server.yaml`) — tools `echo` / `add`.
+
+**Concrete lab steps (domains, UI order, success criteria):** [KMCP.md — §2 Step 5](KMCP.md#step-5--kagent-uses-the-cluster-lab-mcp-integration) (`http://kagent.aire-prep.local` → register `http://mcp-server.aire-prep.svc.cluster.local:8081/mcp`).
+
+**kmcp CLI on the laptop (no kmcp controller):** same doc **§2 Steps 2–4** and **§4** (Cursor `prep-kmcp-smoke`).

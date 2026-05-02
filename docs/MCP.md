@@ -174,7 +174,7 @@ kubectl apply -f manifests/agentgateway/smoke-mcp-via-agentgateway.yaml
 kubectl rollout status deployment/mcp-server -n aire-prep
 ```
 
-Smoke probes (these are expected to return `406 Not Acceptable` for plain browser/curl because MCP expects specific headers like `Accept: text/event-stream`):
+Smoke probes (plain browser or `curl` **without** MCP streamable-http headers should **not** look like a “healthy HTML page”. Typical outcomes: **`406 Not Acceptable`**, or a **JSON-RPC** error such as `Not Acceptable: Client must accept text/event-stream` — that still means the MCP endpoint is there; you need an **MCP client** (see [COURSE-TOOLS-SMOKE.md](COURSE-TOOLS-SMOKE.md) Python probe) rather than a random GET/POST):
 
 ```bash
 curl -i --resolve mcp.aire-prep.local:80:127.0.0.1 http://mcp.aire-prep.local/mcp

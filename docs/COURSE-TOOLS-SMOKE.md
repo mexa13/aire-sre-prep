@@ -9,7 +9,7 @@ If a link breaks, search the **GitHub org/repo** name in the table — projects 
 | **Agent Gateway** | Repo: [github.com/agentgateway/agentgateway](https://github.com/agentgateway/agentgateway) · Docs: [agentgateway.dev](https://agentgateway.dev/) · K8s: [Agentgateway on Kubernetes](https://agentgateway.dev/docs/kubernetes/) | Follow the current **quickstart or Kubernetes install** until a single **routed request** hits a backend (or their documented hello path); note how **auth** (API key / JWT) is configured. |
 | **Kagent** | Repo: [github.com/kagent-dev/kagent](https://github.com/kagent-dev/kagent) · Docs: [kagent.dev/docs](https://kagent.dev/docs) | Complete **Quick start** so an **agent runs in-cluster** and **one tool call** succeeds; list **CRDs** installed (`kubectl get crd \| grep -i kagent` or per their docs). |
 | **llm-d** | Repo: [github.com/llm-d/llm-d](https://github.com/llm-d/llm-d) · Docs: [llm-d.ai](https://www.llm-d.ai/) | Run the smallest **install / demo** from current docs so **at least one inference-related workload** is `Running` (or their equivalent check); write down **GPU vs CPU** assumptions from the guide. |
-| **kmcp** | Repo: [github.com/kagent-dev/kmcp](https://github.com/kagent-dev/kmcp) · Docs: [kagent.dev/docs/kmcp](https://kagent.dev/docs/kmcp) · Deploy: [Deploy MCP servers](https://kagent.dev/docs/kmcp/deploy/server) | Per quickstart: **register or deploy one MCP server** (CLI or controller) and verify **one tool/list** call from their documented test path. |
+| **kmcp** | Repo: [github.com/kagent-dev/kmcp](https://github.com/kagent-dev/kmcp) · Docs: [kagent.dev/docs/kmcp](https://kagent.dev/docs/kmcp) · Deploy (optional): [Deploy MCP servers](https://kagent.dev/docs/kmcp/deploy/server) | **Ordered lab:** [KMCP.md §2](KMCP.md#2-ordered-lab--do-this-sequence) (stdio MCP → kmcp scaffold → HTTP probe → **kagent UI** + `http://mcp-server.aire-prep.svc.cluster.local:8081/mcp`). No kmcp controller required. |
 | **ADK** | Repo: [github.com/google/adk-python](https://github.com/google/adk-python) · Docs: [Get started (Python)](https://google.github.io/adk-docs/get-started/python/) · Samples: [google/adk-samples](https://github.com/google/adk-samples) | `pip install google-adk`, run **`adk create`** + **`adk run`** on the generated agent (or follow the doc’s hello path); note **API key / model** requirement. |
 | **A2A** | Repo: [github.com/a2aproject/A2A](https://github.com/a2aproject/A2A) (spec + samples; start from README **Documentation** links) | Read **protocol overview** + run or trace **one official sample** from the repo (e.g. under `samples/` if present) or the path linked from README; note **JSON-RPC / Agent Card** takeaway in your notes. |
 
@@ -194,14 +194,39 @@ Failure / follow-up:
 
 ---
 
-## kmcp (copy block)
+## kmcp (completed smoke template for this repo)
+
+Full step-by-step guide: [KMCP.md](KMCP.md).
 
 ```text
 Tool: kmcp
-Version / chart / image:
+Version / chart / image: (kmcp CLI from get-kmcp.sh; pin output in VERSION-PINS.md)
+
 Install command(s):
-Single test command: (e.g. kmcp CLI or kubectl get mcp* CRs)
+  curl -fsSL https://raw.githubusercontent.com/kagent-dev/kmcp/refs/heads/main/scripts/get-kmcp.sh | bash
+  kmcp --help
+
+Practice (local, no cluster required):
+  cd /tmp
+  kmcp init python prep-kmcp-smoke --non-interactive
+  cd prep-kmcp-smoke
+  kmcp run --project-dir .
+  # In MCP Inspector: STDIO, command uv, args: run python src/main.py; List tools → run echo
+
+Optional headless:
+  kmcp run --project-dir . --no-inspector
+
+Single test command (minimum):
+  # One successful tool invocation via Inspector (echo) on the scaffolded project
+
+Optional integrations (see KMCP.md §2 Step 3–5):
+  # Cursor prep-kmcp-smoke: KMCP.md §4 (uv run --directory …)
+  # kagent + lab MCP: http://kagent.aire-prep.local → register http://mcp-server.aire-prep.svc.cluster.local:8081/mcp
+
 Failure / follow-up:
+  - Docker not running / build failures during kmcp run
+  - uv or Node inspector missing per docs
+  - Optional K8s deploy only if you choose full kmcp controller path (official quickstart)
 ```
 
 ---
